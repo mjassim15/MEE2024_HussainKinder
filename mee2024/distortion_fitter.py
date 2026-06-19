@@ -132,6 +132,9 @@ def match_centroids(other_stars_df, rough_platesolve_x, dbs, corners, image_size
     plt.ylabel('DEC/degrees')
     plt.title(f'initial rough fit (nstars={obs_matched.shape[0]})')
     plt.legend()
+    plot_dir = options.get('tab2_plot_output_dir')
+    if plot_dir:
+        plt.savefig(Path(plot_dir) / 'rough_fit_initial.png', bbox_inches='tight', dpi=600)
     if options['flag_display2']:
         plt.show()
     plt.close()
@@ -162,8 +165,16 @@ def match_and_fit_distortion(path_data, options, debug_folder=None):
     data_dir = output_dir / 'distortion'
     os.mkdir(output_dir)
     os.mkdir(data_dir)
+
+    # All Tab 2 diagnostic figures are saved under this folder (GUI + notebook).
+    options = dict(options, tab2_plot_output_dir=str(output_dir))
     
-    plate_solve_result = platesolve_triangle.platesolve(np.c_[other_stars_df['py'], other_stars_df['px']], image_size, dict(options, **{'flag_display':False}))
+    plate_solve_result = platesolve_triangle.platesolve(
+        np.c_[other_stars_df['py'], other_stars_df['px']],
+        image_size,
+        dict(options, **{'flag_display': False}),
+        output_dir=output_dir,
+    )
     if not plate_solve_result['success']: # failed platesolve
         raise Exception("BAD DATA - platesolve failed!")
     if plate_solve_result['mirror']:

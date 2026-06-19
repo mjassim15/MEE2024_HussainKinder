@@ -16,6 +16,7 @@ import json
 from collections import defaultdict
 import zipfile
 import statsmodels.api as sm
+from pathlib import Path
 
 mapping = {'constant':0, 'linear':1, 'quadratic':2, 'cubic':3, 'quartic': 4, 'quintic':5, 'sextic': 6, 'septic':7}
 
@@ -276,7 +277,11 @@ def _do_3D_plot(plate, errors, reg_x, reg_y, img_shape, w, m, options):
     Z_n = (Z_x**2+Z_y**2)**0.5
     surf = ax3.plot_surface(X, Y, Z_n, rstride=1, cstride=1, cmap=plt.cm.coolwarm,
                            linewidth=0, antialiased=False, alpha=0.4)
-    
+
+    plot_dir = options.get('tab2_plot_output_dir')
+    if plot_dir:
+        fig.tight_layout()
+        plt.savefig(Path(plot_dir) / 'Error_3D_fits.png', bbox_inches='tight', dpi=600)
     if options['flag_display2']:
         plt.show()
     plt.close()

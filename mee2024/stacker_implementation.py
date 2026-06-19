@@ -184,49 +184,148 @@ and that you have chosen appropriate centroid detection threshholds")
     return result.x, matches1, matches2, result2.x, (result2.fun/vec1.shape[0])**0.5
 
 def do_loop_with_progress_bar(items, fxn, message='Progress', **kwargs):
-    layout = [[sg.Text(message)], [sg.ProgressBar(max_value=len(items), orientation='h', size=(20, 20), key='progress')]]
-    window = sg.Window('Progress Meter', layout, finalize=True)
-    progress_bar = window['progress']
-    ret = []
-    progress_bar.update_bar(0)
-    for i in range(len(items)): 
-        ret.append(fxn(items[i], **kwargs))
-        progress_bar.update_bar(i+1)
-    window.close()
-    return ret
+    def _in_notebook():
+        try:
+            from IPython import get_ipython  # type: ignore
+            ip = get_ipython()
+            if ip is None:
+                return False
+            return ip.__class__.__name__ == "ZMQInteractiveShell"
+        except Exception:
+            return False
+
+    # In notebook contexts, avoid opening GUI progress windows.
+    if _in_notebook():
+        ret = []
+        n = len(items)
+        print(message)
+        for i, item in enumerate(items, start=1):
+            ret.append(fxn(item, **kwargs))
+            if i == 1 or i == n or i % max(1, n // 10) == 0:
+                print(f"  {i}/{n}")
+        return ret
+
+    try:
+        layout = [[sg.Text(message)], [sg.ProgressBar(max_value=len(items), orientation='h', size=(20, 20), key='progress')]]
+        window = sg.Window('Progress Meter', layout, finalize=True)
+        progress_bar = window['progress']
+        ret = []
+        progress_bar.update_bar(0)
+        for i in range(len(items)):
+            ret.append(fxn(items[i], **kwargs))
+            progress_bar.update_bar(i + 1)
+        window.close()
+        return ret
+    except Exception:
+        # If Tk/GUI can't be initialized (common in some Python installs or headless runs),
+        # fall back to simple console progress.
+        ret = []
+        n = len(items)
+        print(message)
+        for i, item in enumerate(items, start=1):
+            ret.append(fxn(item, **kwargs))
+            if i == 1 or i == n or i % max(1, n // 10) == 0:
+                print(f"  {i}/{n}")
+        return ret
 
 def multiprocessing_fxn(q, fxn, item, i, **kwargs):
     #print(item, kwargs)
     q.put((i, fxn(item, **kwargs)))
 
 def do_loop_with_progress_bar_multiprocessing(items, fxn, message='Progress', nthreads=4, **kwargs):
-    layout = [[sg.Text(message)], [sg.ProgressBar(max_value=len(items), orientation='h', size=(20, 20), key='progress')]]
-    window = sg.Window('Progress Meter', layout, finalize=True)
-    progress_bar = window['progress']
-    ret = [None for _ in items]
-    progress_bar.update_bar(0)
-    q = multiprocessing.Queue()
-    procs = []
-    for i, item in enumerate(items[:nthreads]):
-        p = multiprocessing.Process(target=multiprocessing_fxn, args = (q, fxn, item, i), kwargs=kwargs)
-        p.start()
-        procs.append(p)
-    n_ret = 0
-    i = nthreads
-    while n_ret < len(items):
-        x = q.get()
-        ret[x[0]] = x[1] # this way order of inputs is preserved
-        n_ret += 1
-        progress_bar.update_bar(n_ret)
-        if i < len(items):
-            p = multiprocessing.Process(target=multiprocessing_fxn, args = (q, fxn, items[i], i), kwargs=kwargs)
+    def _in_notebook():
+        try:
+            from IPython import get_ipython  # type: ignore
+            ip = get_ipython()
+            if ip is None:
+                return False
+            return ip.__class__.__name__ == "ZMQInteractiveShell"
+        except Exception:
+            return False
+
+    # In notebook contexts, avoid opening GUI progress windows.
+    if _in_notebook():
+        ret = [None for _ in items]
+        n = len(items)
+        print(message)
+        q = multiprocessing.Queue()
+        procs = []
+        for i, item in enumerate(items[:nthreads]):
+            p = multiprocessing.Process(target=multiprocessing_fxn, args=(q, fxn, item, i), kwargs=kwargs)
             p.start()
             procs.append(p)
-            i += 1
-    for p in procs:
-        p.join()
-    window.close()
-    return ret
+        n_ret = 0
+        i = nthreads
+        while n_ret < len(items):
+            x = q.get()
+            ret[x[0]] = x[1]
+            n_ret += 1
+            if n_ret == 1 or n_ret == n or n_ret % max(1, n // 10) == 0:
+                print(f"  {n_ret}/{n}")
+            if i < len(items):
+                p = multiprocessing.Process(target=multiprocessing_fxn, args=(q, fxn, items[i], i), kwargs=kwargs)
+                p.start()
+                procs.append(p)
+                i += 1
+        for p in procs:
+            p.join()
+        return ret
+
+    try:
+        layout = [[sg.Text(message)], [sg.ProgressBar(max_value=len(items), orientation='h', size=(20, 20), key='progress')]]
+        window = sg.Window('Progress Meter', layout, finalize=True)
+        progress_bar = window['progress']
+        ret = [None for _ in items]
+        progress_bar.update_bar(0)
+        q = multiprocessing.Queue()
+        procs = []
+        for i, item in enumerate(items[:nthreads]):
+            p = multiprocessing.Process(target=multiprocessing_fxn, args=(q, fxn, item, i), kwargs=kwargs)
+            p.start()
+            procs.append(p)
+        n_ret = 0
+        i = nthreads
+        while n_ret < len(items):
+            x = q.get()
+            ret[x[0]] = x[1]  # this way order of inputs is preserved
+            n_ret += 1
+            progress_bar.update_bar(n_ret)
+            if i < len(items):
+                p = multiprocessing.Process(target=multiprocessing_fxn, args=(q, fxn, items[i], i), kwargs=kwargs)
+                p.start()
+                procs.append(p)
+                i += 1
+        for p in procs:
+            p.join()
+        window.close()
+        return ret
+    except Exception:
+        # Fall back to the notebook/console progress implementation
+        ret = [None for _ in items]
+        n = len(items)
+        print(message)
+        q = multiprocessing.Queue()
+        procs = []
+        for i, item in enumerate(items[:nthreads]):
+            p = multiprocessing.Process(target=multiprocessing_fxn, args=(q, fxn, item, i), kwargs=kwargs)
+            p.start()
+            procs.append(p)
+        n_ret = 0
+        i = nthreads
+        while n_ret < len(items):
+            x = q.get()
+            ret[x[0]] = x[1]
+            n_ret += 1
+            if n_ret == 1 or n_ret == n or n_ret % max(1, n // 10) == 0:
+                print(f"  {n_ret}/{n}")
+            if i < len(items):
+                p = multiprocessing.Process(target=multiprocessing_fxn, args=(q, fxn, items[i], i), kwargs=kwargs)
+                p.start()
+                procs.append(p)
+                i += 1
+        for p in procs:
+            p.join()
+        return ret
 
 def filter_bad_centroids(centroids_data, mask2, shape):
     ret = []
@@ -713,7 +812,11 @@ def do_stack(files, darkfiles, flatfiles, options):
             plt.gca().annotate((str(int(row['ID']) if isinstance(row['ID'], float) else row['ID']) if 'ID' in row else '') + f'\nMag={row["magV"]:.1f}', (row['px'], row['py']), color='r')
     plt.savefig(output_dir / ('CentroidsStackGood'+starttime+'.png'), bbox_inches="tight", dpi=600)
     if options['flag_display']:
-        show_scanlines(stacked, fig, ax)
+        # The X/Y transcept overlay is interactive (mouse-driven). Disable it
+        # via options['show_scanlines'] = False if you only want the static
+        # chosen-stars plot. Default True preserves prior behavior.
+        if options.get('show_scanlines', True):
+            show_scanlines(stacked, fig, ax)
         #plt.legend()
         plt.show(block=True)
     plt.clf()
@@ -753,7 +856,18 @@ def do_stack(files, darkfiles, flatfiles, options):
                     Path(data_dir))
                     #'data')
     zipfilepath = Path(data_dir).parent / 'data.zip'
-    shutil.move(zipfilepath, Path(output_dir).parent / f'centroid_data{starttime}.zip')
+    out_parent = Path(output_dir).parent
+    zip_out = out_parent / f'centroid_data{starttime}.zip'
+    shutil.move(zipfilepath, zip_out)
+
+    # Match the GUI output structure: also create an extracted folder
+    # `centroid_data{starttime}/` next to the zip with the same 3 files.
+    extracted_dir = out_parent / f'centroid_data{starttime}'
+    extracted_dir.mkdir(parents=True, exist_ok=True)
+    for fname in ('results.txt', 'STACKED_CENTROIDS_DATA.csv', 'STACKED_CENTROIDS_MATCHED_ID.csv'):
+        src = Path(data_dir) / fname
+        if src.exists():
+            shutil.copy2(src, extracted_dir / fname)
     
     logger.info('end time: ' + str(datetime.datetime.now()) + '\n')
     print('Done!')

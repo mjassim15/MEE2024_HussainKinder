@@ -7,6 +7,7 @@ from mee2024 import platesolve_new
 from mee2024.MEE2024util import get_triangle_db_path
 from multiprocessing import Process, Queue
 from multiprocessing import Manager
+import multiprocessing as mp
 class _cache:
 
     database_cache = {}
@@ -39,10 +40,15 @@ def work(q):
 
 def prepare_triangles():
     print('preparing')
-    manager = Manager()
+    try:
+        ctx = mp.get_context("fork")
+    except ValueError:
+        ctx = mp.get_context()
+
+    manager = ctx.Manager()
     result_queue = manager.Queue()
     _cache.q=result_queue
-    _cache.prepare_process = Process(target=work, args = (_cache.q,))
+    _cache.prepare_process = ctx.Process(target=work, args=(_cache.q,))
     _cache.prepare_process.start()
     
 def open_database(path):
@@ -53,6 +59,8 @@ def open_catalogue(path, debug_folder=None, **kwaargs):
         if path == 'gaia':
             _cache.catalogue_cache[path] = gaia_search.dbs_gaia(**kwaargs)
         elif path == get_triangle_db_path():
+            if _cache.prepare_process is None:
+                prepare_triangles()
             print(_cache.prepare_process, _cache.prepare_process.is_alive())
             i = 1          
             while _cache.q.empty() and not path in _cache.catalogue_cache:

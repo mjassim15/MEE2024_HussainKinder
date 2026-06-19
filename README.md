@@ -1,3 +1,4 @@
+
 # MEE2024
 Modern Eddington Experiment codebase
 
@@ -53,9 +54,39 @@ mee2024
 
 - To run (and potentially edit) the Python source code, install the most recent version of Python from python.org (make sure to check the box to add Python to PATH on windows).
 
-- To install requirements: pip install -r requirements.txt
+- **macOS tip:** Apple’s `/usr/bin/python3` often ships an old **Tk** (FreeSimpleGUI warns about Tk 8.5.x) and some binary wheels can **abort** at startup on newer macOS. For a reliable GUI, use **Python 3.12+** from [python.org](https://www.python.org/downloads/) or install a standalone interpreter with [uv](https://docs.astral.sh/uv/) (`uv python install 3.12`), then recreate `.venv` and reinstall requirements.
 
-- Run with python: python mee2024/main.py
+- To install requirements: `pip install -r requirements.txt` (inside your virtual environment).
+
+- **Launch the GUI** (from the repository root, after activating `.venv`):
+
+```
+./run_gui.sh
+```
+
+  Or: `python -m mee2024.main` (do **not** use `python mee2024/main.py`, which breaks package imports).
+
+## Kaggle: PI-aligned Station 1 subset (400 ms run)
+
+The full [Station 1 dataset on Kaggle](https://www.kaggle.com/datasets/kinderphysics/mee-2024-station-1) is very large. To download only the calibration and eclipse 400 ms frames that match the published MEE 2024 layout (one run, not the whole tree), from the repo root (with `.venv` and `~/.kaggle/kaggle.json` set up):
+
+```bash
+# Preview file count and total size (no download)
+DRY_RUN=1 ./scripts/get_pi_run_400ms.sh
+
+# Download into data/pi_run_400ms/
+./scripts/get_pi_run_400ms.sh
+```
+
+Kaggle’s CLI unzips each file into a **flat** `data/pi_run_400ms/` folder (only the filename, no subfolders). **After the download finishes**, run:
+
+```bash
+./scripts/organize_pi_run_400ms.sh
+```
+
+That recreates the intended tree: `calibration/darks/…`, `calibration/flats/…`, `eclipse/science-400ms/…`, and so on, so it lines up with the MEE 2024 layout. Until then, you can still read filenames: the time stamp in the name distinguishes sessions (e.g. `…-0618_5-…` vs `…-0628_3-…`).
+
+A broader helper that can pick “latest” calibration sessions is `scripts/get_station1_400ms.sh`; use `get_pi_run_400ms.sh` when you want the exact run IDs from the project documentation.
 
 ## Tips
 
@@ -102,3 +133,14 @@ This function can be left on, just like "Remove big bright object", even when pr
 
 The file called _MEE_config.txt_ (saved in your appdata or userdata) stores the program parameters, including the input and output directories.
 It is automatically updated each time the program is run, and can also be manually edited for advanced use (all standard parameters can be edited via the GUI).
+
+## STEREO / SECCHI star-field notebook
+
+`STEREO_SECCHI_starfield.ipynb` follows the [SunPy gallery example](https://docs.sunpy.org/en/stable/generated/gallery/units_and_coordinates/STEREO_SECCHI_starfield.html) (Gaia stars on a STEREO COR2 coronagraph image).
+
+```bash
+.venv/bin/pip install -r requirements-stereo.txt
+brew install openjpeg   # macOS only — needed to read .jp2 from Helioviewer
+```
+
+Open the notebook, select the `.venv` kernel, run all cells (internet required).

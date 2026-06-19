@@ -1,0 +1,10 @@
+# STEREO_SECCHI_starfield.ipynb — SunPy gallery example
+# Install:  .venv/bin/pip install -r requirements-stereo.txt
+# macOS also needs OpenJPEG for .jp2 files:  brew install openjpeg
+
+sunpy[map]>=6.0
+hvpy>=1.0
+astroquery>=0.4.6
+glymur>=0.12
+imagecodecs>=2024.1   # decodes .jp2 without brew install openjpeg
+matplotlib>=3.8

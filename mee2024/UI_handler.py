@@ -8,6 +8,7 @@ import FreeSimpleGUI as sg
 import sys
 import json
 import os
+import subprocess
 import traceback
 from PIL import Image, ImageTk
 import io
@@ -345,7 +346,12 @@ def inputUI(options):
             if not x:
                 x = options['workDir']
             if x and os.path.isdir(x):
-                path = os.startfile(os.path.realpath(x))
+                p = os.path.realpath(x)
+                if sys.platform == "win32":
+                    os.startfile(p)
+                else:
+                    opener = "open" if sys.platform == "darwin" else "xdg-open"
+                    subprocess.run([opener, p], check=False)
             else:
                 sg.Popup(popup_messages['no_folder_error'], keep_on_top=True)
         if event=='OK2':
