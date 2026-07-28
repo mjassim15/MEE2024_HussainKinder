@@ -1,0 +1,26 @@
+{
+    "MEE2024 version": "v0.6.0",
+    "platesolved": true,
+    "n_centroids": 252,
+    "img_shape": [
+        6388,
+        9576
+    ],
+    "RA": 17.339449229821184,
+    "DEC": 7.224706605927497,
+    "roll": 0.16954650747959477,
+    "platescale/arcsec": 1.8494777262510251,
+    "#frames stacked": 10,
+    "source_files": "['/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0029.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0028.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0027.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0026.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0025.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0024.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0023.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0022.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0021.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/eclipse/science/2024-04-08-1810_4-CapObj_0020.FIT']",
+    "starttime": "20260619150521",
+    "remove saturated blob?": true,
+    "blob saturation level": 95,
+    "blob_radius_extra": 200,
+    "centroid_gap_blob": 100,
+    "sensitive stacking mode?": true,
+    "use sensitive on stacked result?": true,
+    "background stubtraction mode": "annular",
+    "sigma threshold detection": 4.0,
+    "min_area": 2,
+    "sigma_subtract": 0.0
+}

@@ -1,0 +1,26 @@
+{
+    "MEE2024 version": "v0.6.0",
+    "platesolved": false,
+    "n_centroids": 19,
+    "img_shape": [
+        4096,
+        4096
+    ],
+    "RA": null,
+    "DEC": null,
+    "roll": null,
+    "platescale/arcsec": null,
+    "#frames stacked": 1,
+    "source_files": "['/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/PUNCH_L3_CAM_20260219001600_v0j_MEE.fits']",
+    "starttime": "20260703211530",
+    "remove saturated blob?": false,
+    "blob saturation level": 95,
+    "blob_radius_extra": 350,
+    "centroid_gap_blob": 175,
+    "sensitive stacking mode?": true,
+    "use sensitive on stacked result?": true,
+    "background stubtraction mode": "annular",
+    "sigma threshold detection": 10.0,
+    "min_area": 40,
+    "sigma_subtract": 0.0
+}

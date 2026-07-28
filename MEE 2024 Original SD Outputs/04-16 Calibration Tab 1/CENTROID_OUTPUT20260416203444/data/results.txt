@@ -1,0 +1,26 @@
+{
+    "MEE2024 version": "v0.6.0",
+    "platesolved": true,
+    "n_centroids": 11066,
+    "img_shape": [
+        6388,
+        9576
+    ],
+    "RA": 178.26157896901495,
+    "DEC": 25.100641821104777,
+    "roll": 180.32120991698605,
+    "platescale/arcsec": 1.8506867508638067,
+    "#frames stacked": 10,
+    "source_files": "['/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0019.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0018.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0017.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0016.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0015.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0014.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0013.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0012.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0011.FIT', '/Users/jassim/Desktop/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0010.FIT']",
+    "starttime": "20260416203444",
+    "remove saturated blob?": true,
+    "blob saturation level": 95,
+    "blob_radius_extra": 200,
+    "centroid_gap_blob": 100,
+    "sensitive stacking mode?": false,
+    "use sensitive on stacked result?": true,
+    "background stubtraction mode": "Gaussian",
+    "sigma threshold detection": 4.0,
+    "min_area": 2,
+    "sigma_subtract": 0.0
+}

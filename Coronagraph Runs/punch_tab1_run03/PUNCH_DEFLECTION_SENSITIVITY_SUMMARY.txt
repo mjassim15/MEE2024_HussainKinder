@@ -1,0 +1,11 @@
+PUNCH Deflection Sensitivity Check
+========================================
+Stars used: 3749
+Closest star (R_sun): 83.7
+Einstein prediction at closest (arcsec): 0.0209
+Median total offset (arcsec): 23.2
+Median |radial deflection| (arcsec): 7.4
+Median |residual vs Einstein| (arcsec): 7.4
+Noise floor (arcsec): 22.6
+Signal / noise at closest star: 0.0009
+Verdict: CANNOT measure L yet — signal << noise (stars too far from Sun and/or positions too coarse)

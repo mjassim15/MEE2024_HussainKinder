@@ -1,0 +1,26 @@
+{
+    "MEE2024 version": "v0.6.0",
+    "platesolved": true,
+    "n_centroids": 12196,
+    "img_shape": [
+        6388,
+        9576
+    ],
+    "RA": 178.26156843068162,
+    "DEC": 25.10065629574039,
+    "roll": 180.32065491577697,
+    "platescale/arcsec": 1.8507210182413785,
+    "#frames stacked": 10,
+    "source_files": "['/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0019.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0018.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0017.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0016.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0015.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0014.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0013.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0012.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0011.FIT', '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/MEE 2024 Sample Data/calibration/science/2024-04-08-0608_5-CapObj_0010.FIT']",
+    "starttime": "20260511235731",
+    "remove saturated blob?": false,
+    "blob saturation level": 95,
+    "blob_radius_extra": 200,
+    "centroid_gap_blob": 100,
+    "sensitive stacking mode?": false,
+    "use sensitive on stacked result?": true,
+    "background stubtraction mode": "annular",
+    "sigma threshold detection": 4.0,
+    "min_area": 2,
+    "sigma_subtract": 0.0
+}

@@ -1,0 +1,13 @@
+2026-07-03 19:51:29,261 INFO start time: 2026-07-03 19:51:29.261491
+
+2026-07-03 19:51:29,261 INFO using version:v0.6.0
+2026-07-03 19:51:29,261 INFO using options:{'m': 30, 'n': 30, 'pxl_tol': 10, 'cutoff': 100, 'img_edge_distance': 5, 'rough_match_threshhold': 36, 'sanity_check_centroids': True, 'experimental_background_subtract': False, 'workDir': '', 'workDir2': '', '-DARK-': '', '-FLAT-': '', 'database': '', 'flag_debug': False, 'flag_display2': False, 'flag_display': True, 'save_dark_flat': False, 'float_fits': False, 'd': 200, 'delete_saturated_blob': False, 'blob_saturation_level': 95, 'blob_radius_extra': 350, 'centroid_gap_blob': 175, 'centroid_gaussian_subtract': True, 'sensitive_mode_stack': True, 'centroid_gaussian_thresh': 10.0, 'min_area': 2, 'sigma_subtract': 0.0, 'background_subtraction_mode': 'annular', 'remove_edgy_centroids': True, 'output_dir': '/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/Coronagraph Runs/punch_tab1_bright'}
+2026-07-03 19:51:29,262 INFO stacking files:['/Users/jassim/Desktop/MEE 2024 Coronagraph/MEE2024_HussainKinder/PUNCH_L3_CAM_20260219001600_v0j_MEE.fits']
+2026-07-03 19:51:29,262 INFO using darks:[]
+2026-07-03 19:51:29,262 INFO using flats:[]
+2026-07-03 19:51:29,323 INFO image size:(4096, 4096)
+2026-07-03 19:51:52,440 INFO saving 4824 centroid pixel coordinates
+2026-07-03 19:51:58,394 INFO {'success': False, 'x': None, 'platescale': None, 'matched_centroids': None, 'matched_stars': None, 'platescale/arcsec': None, 'ra': None, 'dec': None, 'roll': None}
+2026-07-03 19:51:58,394 ERROR ERROR: platesolve failed to identify location
+2026-07-03 19:52:02,935 INFO end time: 2026-07-03 19:52:02.935045
+

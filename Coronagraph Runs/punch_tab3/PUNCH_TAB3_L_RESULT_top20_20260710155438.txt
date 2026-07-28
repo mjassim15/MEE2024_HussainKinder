@@ -1,0 +1,21 @@
+PUNCH 'Tab 3' Equivalent — Forced L Measurement
+=======================================================
+mode                : top20
+input frame         : PUNCH_L3_CAM_20260219001600_v0j.fits
+observation         : 2026-02-19T00:16:00.000
+plate scale         : 81.000 arcsec/px
+stars used          : 5
+r range (R_sun)     : 97.6 - 159.6
+
+Nelder-Mead (Tab 3 error_function1):
+  L = -3950.9470 arcsec   rms = 59.210 arcsec
+
+Method 1 (OLS 1/r, plate scale fixed):
+  L = -3870.0926 +/- 3177.9500 arcsec
+  radial rmse = 51.069 arcsec
+  vs accepted L = 1.751: measured/accepted = -2210.2x, |L|/sigma = 1.22
+
+VERDICT:
+  The fit runs end-to-end, but sigma_L = 3177.9 arcsec is 1815x the accepted L = 1.751 arcsec.
+  L is statistically consistent with anything from large-negative to large-positive:
+  this measurement CONSTRAINS NOTHING — as predicted by the plate-scale/noise-floor analysis.

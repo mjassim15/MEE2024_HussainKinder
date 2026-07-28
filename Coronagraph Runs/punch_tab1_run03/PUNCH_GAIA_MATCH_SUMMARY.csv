@@ -1,0 +1,9 @@
+metric,value
+Gaia stars in usable field (mag<8.0),8560
+Centroids total,4343
+Centroids matched to Gaia (real),3749
+Centroids unmatched (likely junk),594
+Gaia stars detected (completeness),3837
+Purity (matched / centroids),86.3%
+Completeness (detected / Gaia),44.8%
+Match tolerance (px),2.0

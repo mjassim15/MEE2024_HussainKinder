@@ -1,0 +1,10 @@
+metric,value
+Gaia stars in frame (G<4.0),97
+Brightest centroids tested (top 50),50
+Centroids matched to Gaia,44
+Centroids unmatched,6
+Gaia G<4.0 stars detected,44
+Purity (matched / centroids),88.0%
+Completeness (detected / Gaia),45.4%
+Match tolerance (px),2.0
+"Median match dist (matched, px)",0.318

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adapting the MEE Pipeline to PUNCH Coronagraph Data — Jassim Hussain</title>
+<style>
+  :root {
+    --navy: #101828;
+    --navy2: #17233c;
+    --navy3: #1c2942;
+    --amber: #e8791d;
+    --amber-soft: #f4b26a;
+    --amber-glow: rgba(232, 121, 29, 0.35);
+    --paper: #faf6f0;
+    --cream: #fdfbf7;
+    --ink: #232733;
+    --muted: #6b7280;
+    --muted-dark: #9aa3b5;
+    --rule: #e4dcd0;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--navy);
+  }
+
+  section.slide {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5vh 7vw;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide.dark  { background: var(--navy); color: #e8ecf4; }
+  .slide.light { background: var(--cream); color: var(--ink); }
+
+  .slide-inner { max-width: 1150px; width: 100%; position: relative; z-index: 2; }
+
+  /* ---------- reveal animations ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s cubic-bezier(.2,.65,.3,1), transform 0.9s cubic-bezier(.2,.65,.3,1);
+  }
+  .reveal.d1 { transition-delay: .12s; }
+  .reveal.d2 { transition-delay: .26s; }
+  .reveal.d3 { transition-delay: .40s; }
+  .reveal.d4 { transition-delay: .54s; }
+  .reveal.d5 { transition-delay: .68s; }
+  .slide.in-view .reveal { opacity: 1; transform: translateY(0); }
+
+  .reveal-scale {
+    opacity: 0;
+    transform: scale(.96);
+    transition: opacity 1s ease, transform 1s cubic-bezier(.2,.65,.3,1);
+    transition-delay: .25s;
+  }
+  .slide.in-view .reveal-scale { opacity: 1; transform: scale(1); }
+
+  /* ---------- typography ---------- */
+  .overline {
+    font-size: .78rem;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--amber-soft);
+    margin-bottom: 1.4rem;
+    font-weight: 600;
+  }
+  .slide.light .overline { color: var(--amber); }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    line-height: 1.12;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.6rem, 3.4vw, 2.5rem);
+    line-height: 1.15;
+    margin-bottom: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+  }
+  .slide.dark h2 { color: #fff; }
+
+  .secnum {
+    font-family: var(--serif);
+    background: var(--amber);
+    color: #fff;
+    font-size: 1.15rem;
+    min-width: 2.4rem;
+    height: 2.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  p.lead { font-size: clamp(1rem, 1.6vw, 1.2rem); line-height: 1.7; max-width: 62ch; }
+  .slide.dark p.lead { color: #c8d2e4; }
+
+  .amber { color: var(--amber); font-weight: 600; }
+  .slide.dark .amber { color: var(--amber-soft); }
+
+  /* ---------- title slide ---------- */
+  #starfield { position: absolute; inset: 0; z-index: 0; }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    animation: twinkle var(--tw, 3s) ease-in-out infinite;
+    opacity: .7;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: .15; }
+    50% { opacity: .85; }
+  }
+  .sun-glow {
+    position: absolute;
+    left: 50%; bottom: -42vh;
+    width: 90vh; height: 90vh;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      rgba(255,214,150,.28) 0%,
+      var(--amber-glow) 28%,
+      rgba(232,121,29,.08) 55%,
+      transparent 72%);
+    pointer-events: none;
+    z-index: 1;
+    animation: breathe 7s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.06); }
+  }
+  .occulter {
+    position: absolute;
+    left: 50%; bottom: -34vh;
+    width: 46vh; height: 46vh;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: var(--navy);
+    box-shadow: 0 0 60px 12px rgba(232,121,29,.25);
+    z-index: 1;
+  }
+  .byline { margin-top: 2.4rem; font-size: 1rem; color: var(--amber-soft); }
+  .byline span { color: var(--muted-dark); }
+  .scroll-hint {
+    position: absolute;
+    bottom: 4.5vh; left: 50%;
+    transform: translateX(-50%);
+    color: var(--muted-dark);
+    font-size: .8rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    animation: bob 2.2s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 8px); }
+  }
+
+  /* ---------- exec summary cards ---------- */
+  .tri-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 2.2rem; }
+  .tcard {
+    background: var(--navy3);
+    border-top: 3px solid var(--amber);
+    border-radius: 6px;
+    padding: 1.6rem 1.5rem;
+  }
+  .tcard h3 {
+    font-family: var(--serif);
+    color: var(--amber-soft);
+    font-size: 1.12rem;
+    margin-bottom: .7rem;
+  }
+  .tcard p { font-size: .95rem; line-height: 1.65; color: #c8d2e4; }
+
+  /* ---------- figure blocks ---------- */
+  figure.big {
+    margin-top: 1.8rem;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0,0,0,.28);
+  }
+  .slide.light figure.big { box-shadow: 0 18px 44px rgba(35,39,51,.18); }
+  figure.big img { display: block; width: 100%; height: auto; }
+  figure.big figcaption {
+    font-size: .85rem;
+    color: var(--muted);
+    font-style: italic;
+    padding: .85rem 1.2rem;
+    background: var(--paper);
+    border-top: 3px solid var(--amber);
+    line-height: 1.5;
+  }
+  .slide.dark figure.big figcaption { background: var(--navy3); color: var(--muted-dark); border-top-color: var(--amber); }
+
+  .split { display: grid; grid-template-columns: 5fr 4fr; gap: 3rem; align-items: center; }
+  .split.rev { grid-template-columns: 4fr 5fr; }
+
+  /* ---------- data facts ---------- */
+  .facts { margin-top: 1.6rem; display: grid; gap: .9rem; }
+  .fact { display: grid; grid-template-columns: 9.5rem 1fr; gap: 1rem; align-items: baseline; }
+  .fact .k {
+    font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--amber);
+  }
+  .fact .v { font-size: .98rem; line-height: 1.55; }
+
+  /* ---------- run table ---------- */
+  table.runs { width: 100%; border-collapse: collapse; margin-top: 1.6rem; font-size: .98rem; }
+  table.runs th {
+    background: var(--navy);
+    color: #fff;
+    text-align: left;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: .8rem 1rem;
+  }
+  table.runs td { padding: .85rem 1rem; border-bottom: 1px solid var(--rule); }
+  table.runs tr.win td { background: var(--paper); font-weight: 600; }
+  table.runs tr.win td:first-child { border-left: 4px solid var(--amber); }
+  table.runs .mono { font-variant-numeric: tabular-nums; }
+
+  /* ---------- stat cards ---------- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.3rem; margin: 2.2rem 0; }
+  .stat {
+    background: var(--navy3);
+    border-top: 4px solid var(--amber);
+    border-radius: 6px;
+    padding: 1.7rem 1.1rem 1.4rem;
+    text-align: center;
+  }
+  .stat .num {
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+    font-weight: 700;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .num .unit { font-size: .6em; color: var(--amber-soft); }
+  .stat .lab { margin-top: .55rem; font-size: .85rem; color: #c8d2e4; }
+  .stat .sub { margin-top: .3rem; font-size: .75rem; font-style: italic; color: var(--muted-dark); }
+
+  /* ---------- callout ---------- */
+  .callout {
+    border-left: 4px solid var(--amber);
+    background: var(--paper);
+    padding: 1.3rem 1.6rem;
+    margin-top: 1.8rem;
+    font-size: 1.02rem;
+    line-height: 1.7;
+    border-radius: 0 6px 6px 0;
+  }
+  .slide.dark .callout { background: var(--navy3); color: #dfe5f0; }
+
+  /* ---------- bullets ---------- */
+  ul.marks { list-style: none; margin-top: 1.4rem; display: grid; gap: 1rem; }
+  ul.marks li { position: relative; padding-left: 1.5rem; font-size: 1rem; line-height: 1.65; }
+  ul.marks li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: .52em;
+    width: .55rem; height: .55rem;
+    background: var(--amber);
+    border-radius: 1px;
+    transform: rotate(45deg);
+  }
+
+  /* ---------- next steps ---------- */
+  .steps { display: grid; gap: 1.2rem; margin-top: 2.2rem; counter-reset: step; }
+  .step {
+    display: grid;
+    grid-template-columns: 3.1rem 1fr;
+    gap: 1.3rem;
+    background: var(--navy3);
+    border-radius: 6px;
+    padding: 1.4rem 1.6rem;
+    align-items: start;
+  }
+  .step .n {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--amber);
+    border-right: 2px solid rgba(232,121,29,.35);
+    padding-right: 1rem;
+    line-height: 1.2;
+  }
+  .step p { font-size: .98rem; line-height: 1.65; color: #dfe5f0; }
+
+  /* ---------- progress dots ---------- */
+  nav#dots {
+    position: fixed;
+    right: 1.6rem; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: .75rem;
+    z-index: 50;
+  }
+  nav#dots a {
+    width: .62rem; height: .62rem;
+    border-radius: 50%;
+    background: rgba(150,160,180,.45);
+    transition: all .3s;
+    display: block;
+  }
+  nav#dots a.active { background: var(--amber); transform: scale(1.45); }
+
+  /* ---------- slide footer tag ---------- */
+  .slidetag {
+    position: absolute;
+    bottom: 2.2vh; left: 7vw;
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(140,150,170,.65);
+    z-index: 3;
+  }
+
+  @media (max-width: 900px) {
+    .tri-cards, .stats { grid-template-columns: 1fr 1fr; }
+    .split, .split.rev { grid-template-columns: 1fr; gap: 1.6rem; }
+    nav#dots { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="dots"></nav>
+
+<!-- ============ SLIDE 1 — TITLE ============ -->
+<section class="slide dark" id="s1">
+  <div id="starfield"></div>
+  <div class="sun-glow"></div>
+  <div class="occulter"></div>
+  <div class="slide-inner" style="text-align:center;">
+    <div class="overline reveal">Progress Report · July 2026</div>
+    <h1 class="reveal d1">Adapting the MEE Pipeline to<br>PUNCH Coronagraph Data</h1>
+    <p class="lead reveal d2" style="margin: 1.6rem auto 0;">Centroid detection, Gaia validation, and what the noise floor taught us</p>
+    <div class="byline reveal d3">Jassim Hussain &nbsp;·&nbsp; <span>PI: Prof. Jesse Kinder</span></div>
+  </div>
+  <div class="scroll-hint">Scroll ↓</div>
+</section>
+
+<!-- ============ SLIDE 2 — EXEC SUMMARY ============ -->
+<section class="slide dark" id="s2">
+  <div class="slide-inner">
+    <div class="overline reveal">Executive Summary</div>
+    <h2 class="reveal d1" style="max-width: 24ch;">Three things to take away</h2>
+    <div class="tri-cards">
+      <div class="tcard reveal d1">
+        <h3>The pipeline works</h3>
+        <p>I adapted our MEE2024 Tab&nbsp;1 centroid pipeline to PUNCH Level-3 white-light images. After three iterations, <strong>86%</strong> of the 4,343 detected centroids correspond to real Gaia catalog stars.</p>
+      </div>
+      <div class="tcard reveal d2">
+        <h3>PUNCH can't reach the signal</h3>
+        <p>At ~81&Prime;/pixel, the gravitational deflection for even our closest detectable star is roughly <strong>1,000&times; below</strong> the measured position noise — and moving closer to the Sun cannot fix it.</p>
+      </div>
+      <div class="tcard reveal d3">
+        <h3>The machinery is the value</h3>
+        <p>Centroid finding, catalog matching, and the sensitivity check are built and validated. The numbers tell us exactly what's needed next: <strong>a finer plate scale</strong>, closer to the Sun.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slidetag">Summary</div>
+</section>
+
+<!-- ============ SLIDE 3 — DATA & SETUP ============ -->
+<section class="slide light" id="s3">
+  <div class="slide-inner split">
+    <div>
+      <h2 class="reveal"><span class="secnum">1</span>Data &amp; Setup</h2>
+      <div class="facts">
+        <div class="fact reveal d1"><div class="k">Instrument</div><div class="v">PUNCH (Polarimeter to Unify the Corona and Heliosphere), Level-3 white light.</div></div>
+        <div class="fact reveal d2"><div class="k">Frame</div><div class="v">2026-02-19 00:16 UTC · 4096 &times; 4096 px · Sun at pixel (2048, 2048).</div></div>
+        <div class="fact reveal d3"><div class="k">Plate scale</div><div class="v">~81 arcsec/pixel — about <span class="amber">44&times; coarser</span> than our eclipse data (~1.85&Prime;/px); 1 R<sub>&#8857;</sub> &asymp; 12 px.</div></div>
+        <div class="fact reveal d4"><div class="k">The challenge</div><div class="v">The corona fills the inner ~20% of the frame with bright, lumpy structure that the centroid finder happily mistakes for stars.</div></div>
+      </div>
+    </div>
+    <figure class="big reveal-scale">
+      <img src="https://raw.githubusercontent.com/mjassim15/MEE2024_HussainKinder/main/assets/report_figures/punch_frame.png" alt="PUNCH white-light frame, 2026-02-19">
+      <figcaption>The 2026-02-19 PUNCH white-light frame. The Sun (black disk) is surrounded by the bright corona; real stars are faint points in the outer field.</figcaption>
+    </figure>
+  </div>
+  <div class="slidetag">Data &amp; Setup</div>
+</section>
+
+<!-- ============ SLIDE 4 — THREE ITERATIONS ============ -->
+<section class="slide light" id="s4">
+  <div class="slide-inner">
+    <h2 class="reveal"><span class="secnum">2</span>Three iterations to a clean detection</h2>
+    <p class="lead reveal d1">MEE's built-in saturation mask assumes an over-exposed Sun. PUNCH's Sun is a dark hole, so that mask never activated — the corona flooded the detector with false positives until I masked it myself.</p>
+    <table class="runs reveal d2">
+      <thead><tr><th>Run</th><th>Threshold</th><th>Corona handling</th><th>Centroids</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">01</td><td class="mono">&sigma; = 6</td><td>none (MEE's blob mask never fires on PUNCH)</td><td class="mono">9,255</td><td>mostly corona junk</td></tr>
+        <tr><td class="mono">02</td><td class="mono">&sigma; = 10</td><td>none</td><td class="mono">4,824</td><td>still corona-dominated</td></tr>
+        <tr class="win"><td class="mono">03</td><td class="mono">&sigma; = 10</td><td>circle mask, r &lt; 1000 px</td><td class="mono">4,343</td><td>clean — used for analysis</td></tr>
+      </tbody>
+    </table>
+    <div class="callout reveal d3">
+      <strong>One important consequence:</strong> at 12 px per solar radius, a 1,000&nbsp;px mask means the nearest star we can possibly detect sits at <span class="amber">~83 solar radii</span>. That inner limit is self-imposed by the mask — not a physical property of the data.
+    </div>
+  </div>
+  <div class="slidetag">Method</div>
+</section>
+
+<!-- ============ SLIDE 5 — THE MASK ============ -->
+<section class="slide light" id="s5">
+  <div class="slide-inner">
+    <h2 class="reveal"><span class="secnum">2</span>The mask that made run 03 work</h2>
+    <p class="lead reveal d1">Every pixel within 1,000 px of Sun-center is replaced with a single flat sky value — the median of a thin ring just outside the mask — blanking 18.7% of the image before the centroid finder ever sees it.</p>
+    <figure class="big reveal-scale">
+      <img src="https://raw.githubusercontent.com/mjassim15/MEE2024_HussainKinder/main/assets/report_figures/mask_preview.png" alt="Original frame vs. circle-masked frame">
+      <figcaption>Left: original frame, corona visible. Right: the pre-processed input actually fed to the centroid finder — everything inside r &lt; 1000 px (dashed circle) is flattened to a single sky value.</figcaption>
+    </figure>
+  </div>
+  <div class="slidetag">Method</div>
+</section>
+
+<!-- ============ SLIDE 6 — GAIA VALIDATION ============ -->
+<section class="slide light" id="s6">
+  <div class="slide-inner">
+    <h2 class="reveal"><span class="secnum">2</span>Validating against Gaia</h2>
+    <p class="lead reveal d1">A detected centroid counts as a <strong>match</strong> if it lands within 2 pixels of where the Gaia catalog says a star should be, projected through PUNCH's pointing solution.</p>
+    <ul class="marks">
+      <li class="reveal d2"><strong>Purity = 86.3%</strong> — of the 4,343 things I flagged, 3,749 are real stars. The detector rarely cries wolf.</li>
+      <li class="reveal d3"><strong>Completeness = 44.8%</strong> — of the 8,560 catalog stars bright enough to be in the usable field, I recovered about 45%. The fainter half stay below PUNCH's noise.</li>
+    </ul>
+    <figure class="big reveal-scale">
+      <img src="https://raw.githubusercontent.com/mjassim15/MEE2024_HussainKinder/main/assets/report_figures/gaia_overlay.png" alt="Gaia validation overlay">
+      <figcaption>Run 03 validation. Left: detected centroids (cyan) on the masked PUNCH frame. Right: the Gaia truth set — green points are catalog stars recovered by the pipeline. The empty center is the corona mask.</figcaption>
+    </figure>
+  </div>
+  <div class="slidetag">Validation</div>
+</section>
+
+<!-- ============ SLIDE 7 — THE LIMITING RESULT ============ -->
+<section class="slide dark" id="s7">
+  <div class="slide-inner">
+    <h2 class="reveal"><span class="secnum">3</span>The limiting result</h2>
+    <p class="lead reveal d1">Deflection signal vs. noise floor — the four numbers that decide everything.</p>
+    <div class="stats">
+      <div class="stat reveal d1"><div class="num"><span class="count" data-target="83.7" data-decimals="1">0</span> <span class="unit">R&#8857;</span></div><div class="lab">closest detectable star</div><div class="sub">set by the corona mask</div></div>
+      <div class="stat reveal d2"><div class="num"><span class="count" data-target="0.021" data-decimals="3">0</span><span class="unit">&Prime;</span></div><div class="lab">predicted deflection there</div><div class="sub">&asymp; 0.0003 pixels</div></div>
+      <div class="stat reveal d3"><div class="num"><span class="count" data-target="22.6" data-decimals="1">0</span><span class="unit">&Prime;</span></div><div class="lab">measured position noise</div><div class="sub">&asymp; 0.28 pixels</div></div>
+      <div class="stat reveal d4"><div class="num">~<span class="count" data-target="1000" data-decimals="0">0</span><span class="unit">&times;</span></div><div class="lab">signal below the noise</div><div class="sub">at every visible radius</div></div>
+    </div>
+    <div class="callout reveal d5">
+      Would detecting stars <em>closer</em> to the Sun close the gap? <strong>No.</strong> Deflection grows as 1.75&Prime;/r, so to lift the signal above even a tenth of a pixel at PUNCH's scale, a star would need to sit at r &lt; 0.2 solar radii — <span class="amber">inside the Sun</span>. The limitation is not where our stars are; it is that 81&Prime; pixels are too coarse for this measurement at any radius.
+    </div>
+  </div>
+  <div class="slidetag">Limiting Result</div>
+</section>
+
+<!-- ============ SLIDE 8 — THE EVIDENCE ============ -->
+<section class="slide light" id="s8">
+  <div class="slide-inner">
+    <h2 class="reveal"><span class="secnum">3</span>The evidence</h2>
+    <figure class="big reveal-scale">
+      <img src="https://raw.githubusercontent.com/mjassim15/MEE2024_HussainKinder/main/assets/report_figures/deflection_scatter.png" alt="Deflection sensitivity scatter">
+      <figcaption>Measured star offsets vs. distance from the Sun (left: total offset, right: radial component). The red curve is the predicted Einstein deflection (1.75&Prime;/r) — three orders of magnitude below the measurement noise at every distance PUNCH can see. The dashed gray line is the ~23&Prime; noise floor.</figcaption>
+    </figure>
+    <p class="lead reveal d2" style="margin-top:1.6rem;">That is a useful thing to know <em>precisely</em> — it points directly at what would work: the same pipeline on a coronagraph with a finer plate scale, which can both resolve smaller shifts and see stars much nearer the limb.</p>
+  </div>
+  <div class="slidetag">Limiting Result</div>
+</section>
+
+<!-- ============ SLIDE 9 — VISUAL-FIRST ============ -->
+<section class="slide light" id="s9">
+  <div class="slide-inner split rev">
+    <figure class="big reveal-scale" style="margin-top:0;">
+      <img src="https://raw.githubusercontent.com/mjassim15/MEE2024_HussainKinder/main/assets/report_figures/top20_comparison.png" alt="Top-20 observed vs predicted comparison">
+      <figcaption>Top-20 brightest detections (orange circles) vs. top-20 predicted Gaia stars (cyan squares). Where a circle has no square, the "star" is corona. The closest genuine match, near the 3 o'clock position, lies at ~98 solar radii.</figcaption>
+    </figure>
+    <div>
+      <h2 class="reveal"><span class="secnum">4</span>A visual-first check</h2>
+      <p class="lead reveal d1">One lesson from the first pass: I trusted the automated brightest-detections list without first confirming by eye which were actually stars. A conversation with <strong>Henry Throop (NASA)</strong> reinforced a better habit — inspect the frame visually and confirm star-like sources <em>before</em> matching.</p>
+      <p class="lead reveal d2" style="margin-top:1.1rem;">The top-20 comparison was immediately informative: several of the brightest detections near the Sun have <span class="amber">no catalog counterpart at all</span> — they are corona structure, not stars — while the nearest visually confirmed star sits at ~98 solar radii.</p>
+      <p class="lead reveal d3" style="margin-top:1.1rem; font-size:.92rem; color:var(--muted);">(For inspection I use DS9, a standard free astronomy viewer for FITS images — zoom and brightness stretch.)</p>
+    </div>
+  </div>
+  <div class="slidetag">Refined Approach</div>
+</section>
+
+<!-- ============ SLIDE 10 — WORKING PRINCIPLE ============ -->
+<section class="slide dark" id="s10">
+  <div class="slide-inner" style="text-align:center; max-width: 900px;">
+    <div class="overline reveal">A working principle I've adopted</div>
+    <h2 class="reveal d1" style="justify-content:center;">The native mission FITS is the<br>only source of truth</h2>
+    <p class="lead reveal d2" style="margin: 0 auto;">Display products — JP2s, PNGs — are stretched, 8-bit, and lossy-compressed. I verified that a JP2 re-wrapped as FITS carries only <span class="amber">256 distinct pixel values</span> versus thousands in the real data. They cannot be used for sub-pixel position work, no matter the file extension.</p>
+    <div class="stats" style="grid-template-columns: 1fr 1fr; max-width: 560px; margin: 2.4rem auto 0;">
+      <div class="stat reveal d3"><div class="num"><span class="count" data-target="256" data-decimals="0">0</span></div><div class="lab">pixel values in a JP2-derived "FITS"</div></div>
+      <div class="stat reveal d4"><div class="num"><span class="count" data-target="7754" data-decimals="0">0</span></div><div class="lab">pixel values in the native science FITS</div></div>
+    </div>
+  </div>
+  <div class="slidetag">Principle</div>
+</section>
+
+<!-- ============ SLIDE 11 — NEXT STEPS ============ -->
+<section class="slide dark" id="s11">
+  <div class="slide-inner">
+    <h2 class="reveal"><span class="secnum">5</span>Next steps</h2>
+    <div class="steps">
+      <div class="step reveal d1"><div class="n">1</div><p>Apply the <strong>visual-first workflow</strong> to establish a trusted star list per frame.</p></div>
+      <div class="step reveal d2"><div class="n">2</div><p>Repeat the <strong>brightest-N analysis across many epochs</strong>, tracking the same stars frame to frame to pin down the real error budget. This can run on PUNCH as a method rehearsal — but the payoff comes on a finer-scale instrument, since we've confirmed PUNCH itself cannot reach the signal at any radius.</p></div>
+      <div class="step reveal d3"><div class="n">3</div><p><strong>Source a science-grade frame from a finer-scale coronagraph.</strong> STEREO — at ~15&Prime;/px, reaching within a few solar radii of the limb — is the leading candidate. That is where this pipeline points next.</p></div>
+    </div>
+    <p class="reveal d4" style="margin-top: 2.6rem; color: var(--muted-dark); font-size: .92rem;">Jassim Hussain · July 2026 &nbsp;·&nbsp; prepared for Prof. Jesse Kinder</p>
+  </div>
+  <div class="slidetag">Next Steps</div>
+</section>
+
+<script>
+  // ---------- starfield ----------
+  const field = document.getElementById('starfield');
+  for (let i = 0; i < 140; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.2 + 0.6;
+    s.style.width = s.style.height = size + 'px';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.setProperty('--tw', (2 + Math.random() * 4).toFixed(2) + 's');
+    s.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+    field.appendChild(s);
+  }
+
+  // ---------- slide reveal + dots ----------
+  const slides = [...document.querySelectorAll('section.slide')];
+  const dotsNav = document.getElementById('dots');
+  slides.forEach((sl) => {
+    const a = document.createElement('a');
+    a.href = '#' + sl.id;
+    dotsNav.appendChild(a);
+  });
+  const dots = [...dotsNav.children];
+
+  const counted = new WeakSet();
+  function runCounters(slide) {
+    slide.querySelectorAll('.count').forEach((el) => {
+      if (counted.has(el)) return;
+      counted.add(el);
+      const target = parseFloat(el.dataset.target);
+      const dec = parseInt(el.dataset.decimals || '0');
+      const dur = 1400;
+      const t0 = performance.now();
+      function tick(t) {
+        const p = Math.min((t - t0) / dur, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = (target * eased).toLocaleString('en-US', {
+          minimumFractionDigits: dec, maximumFractionDigits: dec });
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function activate(slide) {
+    slide.classList.add('in-view');
+    runCounters(slide);
+    const i = slides.indexOf(slide);
+    dots.forEach((d, j) => d.classList.toggle('active', i === j));
+  }
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) activate(e.target); });
+  }, { threshold: 0.45 });
+  slides.forEach((sl) => obs.observe(sl));
+
+  // Fallback: reveal whichever slide is in the viewport right away
+  // (covers environments where IntersectionObserver is delayed or unavailable).
+  function revealVisibleNow() {
+    const mid = window.scrollY + window.innerHeight / 2;
+    slides.forEach((sl) => {
+      if (sl.offsetTop <= mid && mid < sl.offsetTop + sl.offsetHeight) activate(sl);
+    });
+  }
+  revealVisibleNow();
+  window.addEventListener('load', revealVisibleNow);
+  window.addEventListener('scroll', revealVisibleNow, { passive: true });
+
+  // Deep links: jump instantly to #sN on first load (no smooth animation).
+  if (location.hash) {
+    const target = document.querySelector(location.hash);
+    if (target) {
+      document.documentElement.style.scrollBehavior = 'auto';
+      target.scrollIntoView();
+      requestAnimationFrame(() => {
+        document.documentElement.style.scrollBehavior = '';
+        revealVisibleNow();
+      });
+    }
+  }
+
+  // ---------- keyboard navigation ----------
+  let current = 0;
+  const trackObs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) current = slides.indexOf(e.target); });
+  }, { threshold: 0.55 });
+  slides.forEach((sl) => trackObs.observe(sl));
+
+  document.addEventListener('keydown', (ev) => {
+    if (['ArrowDown', 'PageDown', ' '].includes(ev.key)) {
+      ev.preventDefault();
+      slides[Math.min(current + 1, slides.length - 1)].scrollIntoView({ behavior: 'smooth' });
+    } else if (['ArrowUp', 'PageUp'].includes(ev.key)) {
+      ev.preventDefault();
+      slides[Math.max(current - 1, 0)].scrollIntoView({ behavior: 'smooth' });
+    } else if (ev.key === 'Home') {
+      slides[0].scrollIntoView({ behavior: 'smooth' });
+    } else if (ev.key === 'End') {
+      slides[slides.length - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+</script>
+</body>
+</html>
